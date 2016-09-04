@@ -1,86 +1,30 @@
 ﻿//#define ExpandedBulletML
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Diagnostics;
 
 namespace BulletMLLib
 {
-    public enum BLType { None, Aim, Absolute, Relative, Sequence } ;
-
-#if ExpandedBulletML
-    enum BLName
-    {
-        Bullet, Action, Fire, ChangeDirection, ChangeSpeed, Accel,
-        Wait, Repeat, BulletRef, ActionRef, FireRef, Vanish,
-        Horizontal, Vertical, Term, Times, Direction, Speed, Param,
-        Bulletml, None
-    } ;
-#else
-    public enum BLName
-    {
-        Bullet, Action, Fire, ChangeDirection, ChangeSpeed, Accel,
-        Wait, Repeat, BulletRef, ActionRef, FireRef, Vanish,
-        Horizontal, Vertical, Term, Times, Direction, Speed, Param,
-        Bulletml, None
-    } ;
-#endif
-
-    public enum BLValueType { Number, Rand, Rank, Operator, Param } ;
-
     // このインタフェースを実装し、BulletMLManager.Init()を初期化のために必ず呼ぶこと。
-    public interface IBulletMLManager
-    {
-
-        float GetRandom();
-
-        float GetRank();
-
-        float GetShipPosX();
-
-        float GetShipPosY();
-    }
-
-    public static class BulletMLManager
-    {
-        static IBulletMLManager ib;
-        static public void Init(IBulletMLManager ib1)
-        {
-            ib = ib1;
-        }
-
-        static public float GetRandom(){ return ib.GetRandom();}
-
-        static public float GetRank() { return ib.GetRank(); }
-
-        static public float GetShipPosX() { return ib.GetShipPosX(); }
-
-        static public float GetShipPosY() { return ib.GetShipPosY(); }
-
-    }
 
     public class BulletMLTree
     {
-
-        public BLName name;
-        public BLType type;
-        public string label;
-        public BulletMLTree parent;
-        public BulletMLTree next;
-        public List<BulletValue> values;
-        public List<BulletMLTree> children;
+        public BLName Name;
+        public BLType Type;
+        public string Label;
+        public BulletMLTree Parent;
+        public BulletMLTree Next;
+        public readonly List<BulletValue> Values;
+        public readonly List<BulletMLTree> Children;
 #if ExpandedBulletML
         public bool visible;
         public string bulletName;
 #endif
         public BulletMLTree()
         {
-            children = new List<BulletMLTree>();
-            values = new List<BulletValue>();
-            parent = null;
-            next = null;
+            Children = new List<BulletMLTree>();
+            Values = new List<BulletValue>();
+            Parent = null;
+            Next = null;
 #if ExpandedBulletML
             visible = true;
             bulletName = "";
@@ -90,22 +34,24 @@ namespace BulletMLLib
         public BulletMLTree GetLabelNode(string label, BLName name)
         {
             BulletMLTree rootNode = this; //先頭までさかのぼる
-            while (rootNode.parent != null)
-                rootNode = rootNode.parent;
 
-            foreach (BulletMLTree tree in rootNode.children)
+            while (rootNode.Parent != null)
+                rootNode = rootNode.Parent;
+
+            foreach (BulletMLTree tree in rootNode.Children)
             {
-                if (tree.label == label && tree.name == name)
+                if (tree.Label == label && tree.Name == name)
                     return tree;
             }
+
             return null;
         }
 
         public float GetChildValue(BLName name, BulletMLTask task)
         {
-            foreach (BulletMLTree tree in children)
+            foreach (BulletMLTree tree in Children)
             {
-                if (tree.name == name)
+                if (tree.Name == name)
                     return tree.GetValue(task);
             }
             return 0;
@@ -113,9 +59,9 @@ namespace BulletMLLib
 
         public BulletMLTree GetChild(BLName name)
         {
-            foreach (BulletMLTree node in children)
+            foreach (BulletMLTree node in Children)
             {
-                if (node.name == name)
+                if (node.Name == name)
                     return node;
             }
             return null;
@@ -131,81 +77,81 @@ namespace BulletMLLib
         public float GetValue(float v, ref int i, BulletMLTask task)
         {
 
-            for (; i < values.Count; i++)
+            for (; i < Values.Count; i++)
             {
 
-                if (values[i].valueType == BLValueType.Operator)
+                if (Values[i].ValueType == BLValueType.Operator)
                 {
-                    if (values[i].value == '+')
+                    if (Values[i].Value == '+')
                     {
                         i++;
                         if (IsNextNum(i))
-                            v += GetNumValue(values[i], task);
+                            v += GetNumValue(Values[i], task);
                         else
                             v += GetValue(v, ref i, task);
                     }
-                    else if (values[i].value == '-')
+                    else if (Values[i].Value == '-')
                     {
                         i++;
                         if (IsNextNum(i))
-                            v -= GetNumValue(values[i], task);
+                            v -= GetNumValue(Values[i], task);
                         else
                             v -= GetValue(v, ref i, task);
                     }
-                    else if (values[i].value == '*')
+                    else if (Values[i].Value == '*')
                     {
                         i++;
                         if (IsNextNum(i))
-                            v *= GetNumValue(values[i], task);
+                            v *= GetNumValue(Values[i], task);
                         else
                             v *= GetValue(v, ref i, task);
                     }
-                    else if (values[i].value == '/')
+                    else if (Values[i].Value == '/')
                     {
                         i++;
                         if (IsNextNum(i))
-                            v /= GetNumValue(values[i], task);
+                            v /= GetNumValue(Values[i], task);
                         else
                             v /= GetValue(v, ref i, task);
                     }
-                    else if (values[i].value == '(')
+                    else if (Values[i].Value == '(')
                     {
                         i++;
                         float res = GetValue(v, ref i, task);
-                        if ((i < values.Count - 1 && values[i + 1].valueType == BLValueType.Operator)
-                               && (values[i + 1].value == '*' || values[i + 1].value == '/'))
+                        if ((i < Values.Count - 1 && Values[i + 1].ValueType == BLValueType.Operator)
+                               && (Values[i + 1].Value == '*' || Values[i + 1].Value == '/'))
                             return GetValue(res, ref i, task);
                         else
                             return res;
                     }
-                    else if (values[i].value == ')')
+                    else if (Values[i].Value == ')')
                     {
                         //Debug.WriteLine(" ）の戻り値:" + v);
                         return v;
                     }
                 }
-                else if (i < values.Count - 1 && values[i + 1].valueType == BLValueType.Operator && values[i + 1].value == '*')
+                else if (i < Values.Count - 1 && Values[i + 1].ValueType == BLValueType.Operator && Values[i + 1].Value == '*')
                 {
                     // 次が掛け算のとき
-                    float val = GetNumValue(values[i], task);
+                    float val = GetNumValue(Values[i], task);
                     i += 2;
                     if (IsNextNum(i))
-                        return val * GetNumValue(values[i], task);
+                        return val * GetNumValue(Values[i], task);
                     else
                         return val * GetValue(v, ref i, task);
                 }
-                else if (i < values.Count - 1 && values[i + 1].valueType == BLValueType.Operator && values[i + 1].value == '/')
+                else if (i < Values.Count - 1 && Values[i + 1].ValueType == BLValueType.Operator && Values[i + 1].Value == '/')
                 {
                     // 次が割り算のとき
-                    float val = GetNumValue(values[i], task);
+                    float val = GetNumValue(Values[i], task);
                     i += 2;
                     if (IsNextNum(i))
-                        return val / GetNumValue(values[i], task);
+                        return val / GetNumValue(Values[i], task);
                     else
                         return val / GetValue(v, ref i, task);
                 }
                 else
-                    v = GetNumValue(values[i], task);
+                    v = GetNumValue(Values[i], task);
 
             }
 
@@ -214,11 +160,11 @@ namespace BulletMLLib
 
         bool IsNextNum(int i)
         {
-            if ((i < values.Count - 1 && values[i + 1].valueType == BLValueType.Operator) && (values[i + 1].value == '*' || values[i + 1].value == '/'))
+            if ((i < Values.Count - 1 && Values[i + 1].ValueType == BLValueType.Operator) && (Values[i + 1].Value == '*' || Values[i + 1].Value == '/'))
             {
                 return false;
             }
-            else if (values[i].value == ')' || values[i].value == '(')
+            else if (Values[i].Value == ')' || Values[i].Value == '(')
             {
                 return false;
             }
@@ -226,29 +172,27 @@ namespace BulletMLLib
                 return true;
         }
 
-
-
         float GetNumValue(BulletValue v, BulletMLTask task)
         {
-            if (v.valueType == BLValueType.Number)
+            if (v.ValueType == BLValueType.Number)
             {
-                return v.value;
+                return v.Value;
             }
-            else if (v.valueType == BLValueType.Rand)
+            else if (v.ValueType == BLValueType.Rand)
             {
                 return (float)BulletMLManager.GetRandom();
             }
-            else if (v.valueType == BLValueType.Rank)
+            else if (v.ValueType == BLValueType.Rank)
             {
                 return BulletMLManager.GetRank();
             }
-            else if (v.valueType == BLValueType.Param)
+            else if (v.ValueType == BLValueType.Param)
             {
 
                 BulletMLTask ownerTask = task;
-                while (ownerTask.paramList.Count == 0)
-                    ownerTask = ownerTask.owner;
-                float val = ownerTask.paramList[(int)v.value - 1];
+                while (ownerTask.ParamList.Count == 0)
+                    ownerTask = ownerTask.Owner;
+                float val = ownerTask.ParamList[(int)v.Value - 1];
                 
                 //BulletMLTask ownerTask = task;
                 //while (ownerTask.paramNode == null)
@@ -267,20 +211,7 @@ namespace BulletMLLib
 
         internal float GetParam(int p, BulletMLTask task)
         {
-            return children[p].GetValue(task); //<param>以外のタグは持っていないので
+            return Children[p].GetValue(task); //<param>以外のタグは持っていないので
         }
     }
-
-    public class BulletValue
-    {
-        public BLValueType valueType;
-        public float value;
-        public BulletValue(BLValueType type, float value)
-        {
-            this.valueType = type;
-            this.value = value;
-        }
-
-    }
-
 }

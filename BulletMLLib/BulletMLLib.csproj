@@ -41,9 +41,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BLName.cs" />
+    <Compile Include="BLType.cs" />
+    <Compile Include="BLValueType.cs" />
+    <Compile Include="BulletMLAccel.cs" />
     <Compile Include="BulletMLBullet.cs" />
+    <Compile Include="BulletMLFire.cs" />
+    <Compile Include="BulletMLManager.cs" />
     <Compile Include="BulletMLParser.cs" />
+    <Compile Include="BulletMLTask.cs" />
     <Compile Include="BulletMLTree.cs" />
+    <Compile Include="BulletValue.cs" />
+    <Compile Include="FireData.cs" />
+    <Compile Include="IBulletMLBulletInterface.cs" />
+    <Compile Include="IBulletMLManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

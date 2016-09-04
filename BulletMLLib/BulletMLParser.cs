@@ -8,7 +8,7 @@ namespace BulletMLLib
 {
     public class BulletMLParser
     {
-        public BulletMLTree tree;
+        public BulletMLTree Tree;
 
         //static void Main(string[] args)
         //{
@@ -26,12 +26,12 @@ namespace BulletMLLib
         
         //}
 
-        public void ParseXML(string xmlFileName)
+        public void ParseXml(string xmlFileName)
         {
             //Debug.WriteLine(" ----- " + xmlFileName + " ----- ");
             XmlReaderSettings settings = new XmlReaderSettings();
-
             settings.ProhibitDtd = false;
+
             settings.ValidationType = ValidationType.DTD;
             XmlReader reader = XmlReader.Create(xmlFileName, settings);
             BulletMLParser parser = new BulletMLParser();
@@ -46,28 +46,28 @@ namespace BulletMLLib
                             //Debug.Write("<" + reader.Name + ">\n");
 
                             BulletMLTree element = new BulletMLTree();
-                            element.name = parser.StringToName(reader.Name);
+                            element.Name = parser.StringToName(reader.Name);
                             if (reader.HasAttributes)
                             {
-                                element.type = parser.StringToType(reader.GetAttribute("type"));
-                                element.label = reader.GetAttribute("label");
+                                element.Type = parser.StringToType(reader.GetAttribute("type"));
+                                element.Label = reader.GetAttribute("label");
 #if ExpandedBulletML
                                 element.visible = reader.GetAttribute("visible") == "false" ? false : true;
                                 element.bulletName = reader.GetAttribute("name");
 #endif
                             }
 
-                            if (tree == null)
-                                tree = element;
+                            if (Tree == null)
+                                Tree = element;
                             else
                             {
-                                tree.children.Add(element);
-                                if (tree.children.Count > 1)
-                                    tree.children[tree.children.Count - 2].next = tree.children[tree.children.Count - 1];
+                                Tree.Children.Add(element);
+                                if (Tree.Children.Count > 1)
+                                    Tree.Children[Tree.Children.Count - 2].Next = Tree.Children[Tree.Children.Count - 1];
 
-                                element.parent = tree;
+                                element.Parent = Tree;
                                 if (!reader.IsEmptyElement)
-                                    tree = element;
+                                    Tree = element;
                             }
 
                             break;
@@ -80,7 +80,6 @@ namespace BulletMLLib
                             string word = "";
                             for (int i = 0; i < line.Length; i++)
                             {
-                                float num;
                                 if (('0' <= line[i] && line[i] <= '9') || line[i] == '.')
                                 {
                                     word = word + line[i];
@@ -90,9 +89,10 @@ namespace BulletMLLib
 
                                 if (word != "")
                                 {
+                                    float num;
                                     if (float.TryParse(word, out num))
                                     {
-                                        tree.values.Add(new BulletValue(BLValueType.Number, num));
+                                        Tree.Values.Add(new BulletValue(BLValueType.Number, num));
                                         word = "";
                                         //Debug.WriteLine("数値を代入" + num);
                                     }
@@ -106,7 +106,7 @@ namespace BulletMLLib
                                 {
                                     if (line[i + 1] >= '0' && line[i + 1] <= '9')
                                     {
-                                        tree.values.Add(new BulletValue(BLValueType.Param, Convert.ToInt32(line[i + 1].ToString())));
+                                        Tree.Values.Add(new BulletValue(BLValueType.Param, Convert.ToInt32(line[i + 1].ToString())));
                                         i++;
                                         //Debug.WriteLine("パラメータを代入");
                                     }
@@ -114,18 +114,18 @@ namespace BulletMLLib
                                     {
                                         //Debug.WriteLine("ランクを代入");
                                         i += 4;
-                                        tree.values.Add(new BulletValue(BLValueType.Rank, 0));
+                                        Tree.Values.Add(new BulletValue(BLValueType.Rank, 0));
                                     }
                                     else if (line.Substring(i, 5) == "$rand")
                                     {
                                         //Debug.WriteLine("Randを代入");
                                         i += 4;
-                                        tree.values.Add(new BulletValue(BLValueType.Rand, 0));
+                                        Tree.Values.Add(new BulletValue(BLValueType.Rand, 0));
                                     }
                                 }
                                 else if (line[i] == '*' || line[i] == '/' || line[i] == '+' || line[i] == '-' || line[i] == '(' || line[i] == ')')
                                 {
-                                    tree.values.Add(new BulletValue(BLValueType.Operator, line[i]));
+                                    Tree.Values.Add(new BulletValue(BLValueType.Operator, line[i]));
                                     //Debug.WriteLine("演算子を代入 " + line[i]);
                                 }
                                 else if (line[i] == ' ' || line[i] == '\n')
@@ -135,20 +135,17 @@ namespace BulletMLLib
                                 {
                                     //Debug.WriteLine("構文にエラーがあります : " + line[i]);
                                 }
-
                             }
-
 
                             break;
                         case XmlNodeType.EndElement: //Display the end of the element.
-                            if (tree.parent != null)
-                                tree = tree.parent;
+                            if (Tree.Parent != null)
+                                Tree = Tree.Parent;
 
                             //Debug.Write("</" + reader.Name + ">\n");
                             break;
                     }
                 }
-
             }
             catch (Exception e)
             {
@@ -158,61 +155,85 @@ namespace BulletMLLib
             {
                 reader.Close();
             }
+
             //Debug.WriteLine("\n-------------end-----------------");
-
         }
-
      
         string[] name2string = {
 	        "bullet", "action", "fire", "changeDirection", "changeSpeed", "accel",
 	        "wait", "repeat", "bulletRef", "actionRef", "fireRef", "vanish",
 	        "horizontal", "vertical", "term", "times", "direction", "speed", "param",
 	        "bulletml"
-                                   };
+        };
 
         BLType StringToType(string str) 
         {
-            if (str == "aim") return BLType.Aim;
-            else if (str == "absolute") return BLType.Absolute;
-            else if (str == "relative") return BLType.Relative;
-            else if (str == "sequence") return BLType.Sequence;
-            else if (str == null) return BLType.None;
-            //else Debug.WriteLine("BulletML parser: unknown type " + str);
-
-            return BLType.None;
+            switch (str)
+            {
+                case "aim":
+                    return BLType.Aim;
+                case "absolute":
+                    return BLType.Absolute;
+                case "relative":
+                    return BLType.Relative;
+                case "sequence":
+                    return BLType.Sequence;
+                default:
+                    Debug.WriteLine("BulletML parser: unknown type " + str);
+                    return BLType.None;
+            }
         }
 
         //タグ文字列をBLNameに変換する
         BLName StringToName(string str)
         {
             Debug.WriteLine(" tag " + str);
-            if (str == "bulletml") return BLName.Bulletml;
-            else if (str == "bullet") return BLName.Bullet;
-            else if (str == "action") return BLName.Action;
-            else if (str == "fire") return BLName.Fire;
-            else if (str == "changeDirection") return BLName.ChangeDirection;
-            else if (str == "changeSpeed") return BLName.ChangeSpeed;
-            else if (str == "accel") return BLName.Accel;
-            else if (str == "vanish") return BLName.Vanish;
-            else if (str == "wait") return BLName.Wait;
-            else if (str == "repeat") return BLName.Repeat;
-            else if (str == "direction") return BLName.Direction;
-            else if (str == "speed") return BLName.Speed;
-            else if (str == "horizontal") return BLName.Horizontal;
-            else if (str == "vertical") return BLName.Vertical;
-            else if (str == "term") return BLName.Term;
-            else if (str == "bulletRef") return BLName.BulletRef;
-            else if (str == "actionRef") return BLName.ActionRef;
-            else if (str == "fireRef") return BLName.FireRef;
-            else if (str == "param") return BLName.Param;
-            else if (str == "times") return BLName.Times;
-            else if (str == "") return BLName.None;
-            //else Debug.WriteLine("BulletML parser: unknown tag " + str);
-
-            return BLName.None;
-
+            switch (str)
+            {
+                case "bulletml":
+                    return BLName.Bulletml;
+                case "bullet":
+                    return BLName.Bullet;
+                case "action":
+                    return BLName.Action;
+                case "fire":
+                    return BLName.Fire;
+                case "changeDirection":
+                    return BLName.ChangeDirection;
+                case "changeSpeed":
+                    return BLName.ChangeSpeed;
+                case "accel":
+                    return BLName.Accel;
+                case "vanish":
+                    return BLName.Vanish;
+                case "wait":
+                    return BLName.Wait;
+                case "repeat":
+                    return BLName.Repeat;
+                case "direction":
+                    return BLName.Direction;
+                case "speed":
+                    return BLName.Speed;
+                case "horizontal":
+                    return BLName.Horizontal;
+                case "vertical":
+                    return BLName.Vertical;
+                case "term":
+                    return BLName.Term;
+                case "bulletRef":
+                    return BLName.BulletRef;
+                case "actionRef":
+                    return BLName.ActionRef;
+                case "fireRef":
+                    return BLName.FireRef;
+                case "param":
+                    return BLName.Param;
+                case "times":
+                    return BLName.Times;
+                default:
+                    Debug.WriteLine("BulletML parser: unknown tag " + str);
+                    return BLName.None;
+            }
         }
-
-    
     }
 }
