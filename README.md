@@ -1,5 +1,5 @@
 # BulletMLLib
-A C# parser for BulletML language implemented by Keiichi Kashihara of Bandle Games. All credit goes to him.
+A C# parser for BulletML language (version *0.21*) implemented by Keiichi Kashihara of Bandle Games. All credit goes to him.
 
 To have more information about this parser, please go here: https://sites.google.com/site/bandlegames/bulletml-c
 
