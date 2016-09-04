@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace BulletMLLib
 {
-    class BulletMLParser
+    public class BulletMLParser
     {
         public BulletMLTree tree;
 

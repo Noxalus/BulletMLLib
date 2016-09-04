@@ -8,7 +8,7 @@ using System.Diagnostics;
 
 namespace BulletMLLib
 {
-    enum BLType { None, Aim, Absolute, Relative, Sequence } ;
+    public enum BLType { None, Aim, Absolute, Relative, Sequence } ;
 
 #if ExpandedBulletML
     enum BLName
@@ -19,7 +19,7 @@ namespace BulletMLLib
         Bulletml, None
     } ;
 #else
-    enum BLName
+    public enum BLName
     {
         Bullet, Action, Fire, ChangeDirection, ChangeSpeed, Accel,
         Wait, Repeat, BulletRef, ActionRef, FireRef, Vanish,
@@ -27,11 +27,11 @@ namespace BulletMLLib
         Bulletml, None
     } ;
 #endif
-    
-    enum BLValueType { Number, Rand, Rank, Operator, Param } ;
+
+    public enum BLValueType { Number, Rand, Rank, Operator, Param } ;
 
     // このインタフェースを実装し、BulletMLManager.Init()を初期化のために必ず呼ぶこと。
-    interface IBulletMLManager
+    public interface IBulletMLManager
     {
 
         float GetRandom();
@@ -43,7 +43,7 @@ namespace BulletMLLib
         float GetShipPosY();
     }
 
-    static class BulletMLManager
+    public static class BulletMLManager
     {
         static IBulletMLManager ib;
         static public void Init(IBulletMLManager ib1)
@@ -61,7 +61,7 @@ namespace BulletMLLib
 
     }
 
-    class BulletMLTree
+    public class BulletMLTree
     {
 
         public BLName name;
@@ -271,7 +271,7 @@ namespace BulletMLLib
         }
     }
 
-    class BulletValue
+    public class BulletValue
     {
         public BLValueType valueType;
         public float value;

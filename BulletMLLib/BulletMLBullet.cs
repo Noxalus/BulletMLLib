@@ -24,7 +24,7 @@ namespace BulletMLLib
     /// <summary>
     /// BulletMLを使用する場合は、このインタフェースを継承した弾クラスを作成すること
     /// </summary>
-    interface IBulletMLBulletInterface
+    public interface IBulletMLBulletInterface
     {
         //仮想プロパティ・メソッド
         float X { get; set; }
@@ -41,7 +41,7 @@ namespace BulletMLLib
 
     }
 
-    class FireData
+    public class FireData
     {
         public float srcSpeed = 0;
         public float srcDir = 0;
@@ -51,7 +51,7 @@ namespace BulletMLLib
     /// BulletMLライブラリ内部で使用する弾を表す。
     /// IBulletMLBulletInterfaceを継承したクラスに、変数として一つ持たせておくこと。
     /// </summary>
-    class BulletMLBullet
+    public class BulletMLBullet
     {
         IBulletMLBulletInterface ibullet;
         //private float dir;
@@ -241,7 +241,7 @@ namespace BulletMLLib
     /// BulletMLタスク
     /// 実際に弾を動かすクラス
     /// </summary>
-    class BulletMLTask
+    public class BulletMLTask
     {
         public const int DISP_BULLET_INDEX = 1;
 
